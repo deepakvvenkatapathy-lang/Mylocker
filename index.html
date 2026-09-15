@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python OOP Quiz & Compiler</title>
+
+<!-- Skulpt: runs real Python in the browser -->
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+<style>
+  :root{
+    --bg1:#1e1b4b;
+    --bg2:#312e81;
+    --accent:#f472b6;
+    --accent2:#a78bfa;
+    --card:#ffffff;
+    --text-dark:#1f2333;
+    --good:#22c55e;
+    --bad:#ef4444;
+    --bulb:#fbbf24;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Roboto, Arial, sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2) 60%,#701a75);
+    color:#eef;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  header{
+    text-align:center;
+    padding:40px 20px 20px;
+  }
+  header h1{
+    font-size:2.2rem;
+    margin:0 0 6px;
+    background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header p{color:#c7c9e0;margin:0;}
+  #progress{
+    text-align:center;
+    font-size:1.05rem;
+    margin:10px auto 30px;
+    color:#fef08a;
+    font-weight:600;
+  }
+  .container{
+    max-width:900px;
+    margin:0 auto;
+    padding:0 18px;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+  }
+  .card{
+    background:var(--card);
+    color:var(--text-dark);
+    border-radius:16px;
+    padding:22px 24px 26px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+    position:relative;
+    overflow:hidden;
+    border:2px solid transparent;
+    transition:border-color .3s;
+  }
+  .card.solved{
+    border-color:var(--good);
+  }
+  .qhead{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .qtitle{
+    font-size:1.15rem;
+    font-weight:700;
+    margin:0 0 6px;
+    color:#312e81;
+  }
+  .qbadge{
+    display:inline-block;
+    font-size:.72rem;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:20px;
+    margin-left:8px;
+    text-transform:uppercase;
+    vertical-align:middle;
+  }
+  .badge-easy{background:#d1fae5;color:#047857;}
+  .badge-medium{background:#fef3c7;color:#b45309;}
+  .qdesc{
+    font-size:.95rem;
+    color:#374151;
+    margin:6px 0 14px;
+    line-height:1.5;
+  }
+  .btnrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin:4px 0 14px;
+  }
+  .icon-btn{
+    border:none;
+    cursor:pointer;
+    border-radius:50%;
+    width:44px;
+    height:44px;
+    font-size:1.3rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
+    transition:transform .15s;
+  }
+  .icon-btn:hover{transform:scale(1.08);}
+  .icon-btn:active{transform:scale(0.94);}
+  .hint-btn{
+    background:radial-gradient(circle at 35% 30%,#fff7cc,var(--bulb) 70%);
+    color:#78350f;
+    animation:pulseGlow 1.6s infinite;
+  }
+  @keyframes pulseGlow{
+    0%{box-shadow:0 0 0 0 rgba(251,191,36,0.7);}
+    70%{box-shadow:0 0 0 12px rgba(251,191,36,0);}
+    100%{box-shadow:0 0 0 0 rgba(251,191,36,0);}
+  }
+  .answer-btn{
+    background:linear-gradient(135deg,#a78bfa,#818cf8);
+    color:#fff;
+  }
+  .run-btn{
+    background:linear-gradient(135deg,#34d399,#059669);
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:10px 20px;
+    font-size:.95rem;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 3px 8px rgba(0,0,0,0.25);
+  }
+  .run-btn:hover{filter:brightness(1.08);}
+  .hint-tag, .answer-tag{
+    font-size:.8rem;
+    color:#6b7280;
+    font-weight:600;
+  }
+  textarea{
+    width:100%;
+    min-height:150px;
+    background:#0f172a;
+    color:#e2e8f0;
+    font-family:'Consolas','Courier New',monospace;
+    font-size:.92rem;
+    border-radius:10px;
+    border:1px solid #334155;
+    padding:14px;
+    resize:vertical;
+    line-height:1.5;
+    tab-size:4;
+  }
+  .hintbox{
+    display:none;
+    margin-top:10px;
+    background:#fffbeb;
+    border-left:4px solid var(--bulb);
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:.9rem;
+    color:#78350f;
+  }
+  .answerbox{
+    display:none;
+    margin-top:10px;
+    background:#eef2ff;
+    border-left:4px solid var(--accent2);
+    padding:12px 14px;
+    border-radius:8px;
+    font-size:.88rem;
+    color:#312e81;
+  }
+  .answerbox pre{
+    background:#1e1b4b;
+    color:#e0e7ff;
+    padding:10px;
+    border-radius:8px;
+    overflow-x:auto;
+    font-size:.82rem;
+  }
+  .result{
+    margin-top:14px;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:.9rem;
+    font-weight:600;
+    white-space:pre-wrap;
+    display:none;
+  }
+  .result.ok{
+    display:block;
+    background:#dcfce7;
+    color:#166534;
+    border:1px solid #86efac;
+  }
+  .result.err{
+    display:block;
+    background:#fee2e2;
+    color:#991b1b;
+    border:1px solid #fca5a5;
+  }
+  .out-label{font-weight:700;display:block;margin-bottom:4px;}
+
+  /* Heart bomb overlay */
+  #heart-overlay{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:9999;
+    overflow:hidden;
+  }
+  .heart{
+    position:absolute;
+    bottom:-40px;
+    font-size:28px;
+    opacity:0.95;
+    animation:floatUp 1.8s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%{transform:translateY(0) scale(0.6) rotate(0deg);opacity:1;}
+    70%{opacity:1;}
+    100%{transform:translateY(-100vh) scale(1.3) rotate(25deg);opacity:0;}
+  }
+  .best-msg{
+    position:fixed;
+    top:40%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(0.5);
+    font-size:2.4rem;
+    font-weight:800;
+    color:#fff;
+    text-shadow:0 0 20px #f472b6,0 0 40px #a78bfa;
+    z-index:10000;
+    opacity:0;
+    animation:popMsg 2s ease forwards;
+    pointer-events:none;
+    text-align:center;
+  }
+  @keyframes popMsg{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(0.3);}
+    20%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}
+    35%{transform:translate(-50%,-50%) scale(1);}
+    80%{opacity:1;}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.05);}
+  }
+  footer{
+    text-align:center;
+    color:#c7c9e0;
+    font-size:.85rem;
+    margin-top:40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐍 Python OOP Quiz & Live Compiler</h1>
+  <p>Solve 10 Object-Oriented Programming challenges — write real Python, run it, and get instant feedback.</p>
+</header>
+<div id="progress">Solved: 0 / 10</div>
+
+<div class="container" id="quiz-container"></div>
+
+<footer>Tip: click 💡 for hints, 📖 for the full answer with an example. Get it right to see the magic ✨</footer>
+
+<script>
+const questions = [
+{
+  id:1,
+  level:"easy",
+  title:"Q1. Classes & Objects — Basics",
+  desc:"Create a class <code>Dog</code> with a method <code>bark()</code> that prints <b>Woof! Woof!</b> Then create an object <code>d</code> and call the method.",
+  starter:
+`class Dog:
+    def bark(self):
+        # TODO: print "Woof! Woof!"
+        pass
+
+d = Dog()
+d.bark()`,
+  hints:[
+    "A class is a blueprint — you define methods with 'def' inside it.",
+    "Use print() inside bark() to display the text.",
+    "The exact line should be: print(\"Woof! Woof!\")"
+  ],
+  expected:"Woof! Woof!",
+  answerCode:
+`class Dog:
+    def bark(self):
+        print("Woof! Woof!")
+
+d = Dog()
+d.bark()`,
+  example:"Classes bundle data and behaviour together. Here, Dog is the blueprint, bark() is the behaviour, and d = Dog() creates an actual object (instance) that can use that behaviour."
+},
+{
+  id:2,
+  level:"easy",
+  title:"Q2. The __init__ Constructor",
+  desc:"Create class <code>Car</code> whose <code>__init__</code> takes <code>brand</code> and <code>model</code> and stores them. Add a method <code>show()</code> that prints exactly: <b>Brand: Toyota, Model: Corolla</b>.",
+  starter:
+`class Car:
+    def __init__(self, brand, model):
+        # TODO: store brand and model
+        pass
+
+    def show(self):
+        # TODO: print "Brand: X, Model: Y"
+        pass
+
+c = Car("Toyota", "Corolla")
+c.show()`,
+  hints:[
+    "__init__ runs automatically the moment an object is created.",
+    "Inside __init__, save the values with self.brand = brand and self.model = model.",
+    "In show(), use: print(f\"Brand: {self.brand}, Model: {self.model}\")"
+  ],
+  expected:"Brand: Toyota, Model: Corolla",
+  answerCode:
+`class Car:
+    def __init__(self, brand, model):
+        self.brand = brand
+        self.model = model
+
+    def show(self):
+        print(f"Brand: {self.brand}, Model: {self.model}")
+
+c = Car("Toyota", "Corolla")
+c.show()`,
+  example:"__init__ is the constructor — it initialises instance attributes as soon as Car(\"Toyota\",\"Corolla\") runs, so every object stores its own brand and model."
+},
+{
+  id:3,
+  level:"easy",
+  title:"Q3. Class Variables vs Instance Variables",
+  desc:"Create class <code>Counter</code> with a class variable <code>count = 0</code>. Every time an object is created, increase <code>count</code> by 1 inside <code>__init__</code>. Create 3 objects and print the count.",
+  starter:
+`class Counter:
+    count = 0
+
+    def __init__(self):
+        # TODO: increase the class variable by 1
+        pass
+
+Counter()
+Counter()
+Counter()
+print(Counter.count)`,
+  hints:[
+    "Class variables are shared by ALL objects of the class, not just one.",
+    "Update it using Counter.count += 1 (write inside __init__).",
+    "After creating 3 objects, Counter.count should equal 3."
+  ],
+  expected:"3",
+  answerCode:
+`class Counter:
+    count = 0
+
+    def __init__(self):
+        Counter.count += 1
+
+Counter()
+Counter()
+Counter()
+print(Counter.count)`,
+  example:"Class variables live on the class itself and are shared. Each new Counter() call bumps the same shared count, so after 3 objects it reads 3 — unlike instance variables (self.x) which are unique per object."
+},
+{
+  id:4,
+  level:"easy",
+  title:"Q4. Inheritance",
+  desc:"Create base class <code>Animal</code> with method <code>speak()</code> that prints <b>Some sound</b>. Create class <code>Dog</code> that inherits from <code>Animal</code> (don't add anything new).",
+  starter:
+`class Animal:
+    def speak(self):
+        print("Some sound")
+
+class Dog(Animal):
+    # TODO: inherit from Animal, no need to add code here
+    pass
+
+d = Dog()
+d.speak()`,
+  hints:[
+    "Inheritance is written as class Dog(Animal): — Dog gets everything Animal has.",
+    "You don't need to rewrite speak() in Dog; it's inherited automatically.",
+    "Just make sure 'class Dog(Animal):' is correct and the pass/TODO doesn't remove that."
+  ],
+  expected:"Some sound",
+  answerCode:
+`class Animal:
+    def speak(self):
+        print("Some sound")
+
+class Dog(Animal):
+    pass
+
+d = Dog()
+d.speak()`,
+  example:"Dog(Animal) means Dog inherits all methods and attributes of Animal. Since Dog doesn't override speak(), calling d.speak() uses Animal's version and prints 'Some sound'."
+},
+{
+  id:5,
+  level:"easy",
+  title:"Q5. Method Overriding",
+  desc:"Using the same <code>Animal</code> base class, make <code>Dog</code> override <code>speak()</code> to print <b>Bark!</b> instead.",
+  starter:
+`class Animal:
+    def speak(self):
+        print("Some sound")
+
+class Dog(Animal):
+    def speak(self):
+        # TODO: print "Bark!"
+        pass
+
+d = Dog()
+d.speak()`,
+  hints:[
+    "Overriding means writing a method with the SAME name in the subclass.",
+    "Just define speak(self) again inside Dog with new code.",
+    "Inside Dog's speak(), write: print(\"Bark!\")"
+  ],
+  expected:"Bark!",
+  answerCode:
+`class Animal:
+    def speak(self):
+        print("Some sound")
+
+class Dog(Animal):
+    def speak(self):
+        print("Bark!")
+
+d = Dog()
+d.speak()`,
+  example:"When a subclass defines a method with the same name as the parent, the subclass version 'overrides' it. Even though Dog inherits from Animal, d.speak() now prints 'Bark!' instead of 'Some sound'."
+},
+{
+  id:6,
+  level:"medium",
+  title:"Q6. Encapsulation",
+  desc:"Create class <code>Account</code> whose <code>__init__</code> takes <code>balance</code> and stores it as a private attribute <code>__balance</code>. Add method <code>get_balance()</code> that returns it.",
+  starter:
+`class Account:
+    def __init__(self, balance):
+        # TODO: store balance as a private attribute __balance
+        pass
+
+    def get_balance(self):
+        # TODO: return the private balance
+        pass
+
+acc = Account(100)
+print(acc.get_balance())`,
+  hints:[
+    "A double underscore prefix (like __balance) makes an attribute 'private' in Python.",
+    "In __init__ write: self.__balance = balance",
+    "In get_balance(), write: return self.__balance"
+  ],
+  expected:"100",
+  answerCode:
+`class Account:
+    def __init__(self, balance):
+        self.__balance = balance
+
+    def get_balance(self):
+        return self.__balance
+
+acc = Account(100)
+print(acc.get_balance())`,
+  example:"Encapsulation hides internal data. __balance can't be accessed directly as acc.__balance from outside the class easily — instead we expose a controlled method get_balance() to read it safely."
+},
+{
+  id:7,
+  level:"medium",
+  title:"Q7. Polymorphism",
+  desc:"Create classes <code>Cat</code> and <code>Dog</code>, each with a method <code>speak()</code> — Cat's returns <b>\"Meow\"</b>, Dog's returns <b>\"Woof\"</b>. Loop through the list and print both.",
+  starter:
+`class Cat:
+    def speak(self):
+        # TODO: return "Meow"
+        pass
+
+class Dog:
+    def speak(self):
+        # TODO: return "Woof"
+        pass
+
+animals = [Cat(), Dog()]
+for a in animals:
+    print(a.speak())`,
+  hints:[
+    "Polymorphism lets different classes respond to the same method call (speak()) in their own way.",
+    "Each speak() method should use 'return', not print, since the loop prints it.",
+    "Cat.speak() should return \"Meow\" and Dog.speak() should return \"Woof\"."
+  ],
+  expected:"Meow\nWoof",
+  answerCode:
+`class Cat:
+    def speak(self):
+        return "Meow"
+
+class Dog:
+    def speak(self):
+        return "Woof"
+
+animals = [Cat(), Dog()]
+for a in animals:
+    print(a.speak())`,
+  example:"Polymorphism means 'many forms' — the same call a.speak() behaves differently depending on whether 'a' is a Cat or a Dog, without the loop needing to know which class it is."
+},
+{
+  id:8,
+  level:"medium",
+  title:"Q8. Static Methods",
+  desc:"Create class <code>MathUtils</code> with a <b>static method</b> <code>add(a, b)</code> that returns <code>a + b</code>. Call it directly as <code>MathUtils.add(2, 3)</code> and print the result.",
+  starter:
+`class MathUtils:
+    @staticmethod
+    def add(a, b):
+        # TODO: return a + b
+        pass
+
+print(MathUtils.add(2, 3))`,
+  hints:[
+    "@staticmethod means the method doesn't need 'self' or access to the object at all.",
+    "It behaves like a normal function, just grouped inside the class for organisation.",
+    "Simply write: return a + b"
+  ],
+  expected:"5",
+  answerCode:
+`class MathUtils:
+    @staticmethod
+    def add(a, b):
+        return a + b
+
+print(MathUtils.add(2, 3))`,
+  example:"Static methods are utility functions that belong to a class logically but don't touch instance data. That's why we can call MathUtils.add(2,3) directly, without creating an object first."
+},
+{
+  id:9,
+  level:"medium",
+  title:"Q9. Magic Method __str__",
+  desc:"Create class <code>Point</code> with <code>__init__(self, x, y)</code> storing x and y. Add <code>__str__</code> so that <code>print(p)</code> shows exactly: <b>Point(2, 3)</b> for <code>p = Point(2, 3)</code>.",
+  starter:
+`class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        # TODO: return "Point(x, y)" using self.x and self.y
+        pass
+
+p = Point(2, 3)
+print(p)`,
+  hints:[
+    "__str__ controls what print() shows for an object — it must return a string.",
+    "Use an f-string: f\"Point({self.x}, {self.y})\"",
+    "Make sure you use 'return', not 'print', inside __str__."
+  ],
+  expected:"Point(2, 3)",
+  answerCode:
+`class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        return f"Point({self.x}, {self.y})"
+
+p = Point(2, 3)
+print(p)`,
+  example:"Magic (dunder) methods let objects work with built-in functions. Defining __str__ tells Python exactly how to turn the object into text whenever it's printed, instead of showing something cryptic."
+},
+{
+  id:10,
+  level:"medium",
+  title:"Q10. Abstraction",
+  desc:"Create class <code>Shape</code> with a method <code>area()</code> that raises <code>NotImplementedError</code> (an 'abstract' placeholder). Create subclass <code>Square</code> with <code>__init__(self, side)</code> and override <code>area()</code> to return <code>side * side</code>.",
+  starter:
+`class Shape:
+    def area(self):
+        raise NotImplementedError("Subclasses must implement area()")
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        # TODO: return side * side
+        pass
+
+sq = Square(4)
+print(sq.area())`,
+  hints:[
+    "Abstraction means the base class only defines WHAT should happen (area exists), not HOW.",
+    "Square must override area() to give the actual calculation.",
+    "Write: return self.side * self.side"
+  ],
+  expected:"16",
+  answerCode:
+`class Shape:
+    def area(self):
+        raise NotImplementedError("Subclasses must implement area()")
+
+class Square(Shape):
+    def __init__(self, side):
+        self.side = side
+
+    def area(self):
+        return self.side * self.side
+
+sq = Square(4)
+print(sq.area())`,
+  example:"Shape defines a contract: every shape must have area(), but it doesn't know how to compute it. Square provides the real implementation. This hides unnecessary detail behind a simple, common interface."
+}
+];
+
+let solvedCount = 0;
+const hintState = {};
+
+function buildUI(){
+  const container = document.getElementById('quiz-container');
+  questions.forEach(q => {
+    hintState[q.id] = 0;
+    const badgeClass = q.level === 'easy' ? 'badge-easy' : 'badge-medium';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card'+q.id;
+    card.innerHTML = `
+      <div class="qhead">
+        <div>
+          <span class="qtitle">${q.title}</span>
+          <span class="qbadge ${badgeClass}">${q.level}</span>
+        </div>
+      </div>
+      <p class="qdesc">${q.desc}</p>
+      <textarea id="code${q.id}" spellcheck="false">${q.starter}</textarea>
+      <div class="btnrow">
+        <button class="run-btn" onclick="runCode(${q.id})">▶ Run Code</button>
+        <button class="icon-btn hint-btn" title="Get a hint" onclick="showHint(${q.id})">💡</button>
+        <span class="hint-tag">Hint</span>
+        <button class="icon-btn answer-btn" title="See the answer" onclick="toggleAnswer(${q.id})">📖</button>
+        <span class="answer-tag">Answer</span>
+      </div>
+      <div class="hintbox" id="hintbox${q.id}"></div>
+      <div class="answerbox" id="answerbox${q.id}">
+        <b>✅ Correct Solution:</b>
+        <pre>${escapeHtml(q.answerCode)}</pre>
+        <b>💡 Why it works:</b>
+        <p>${q.example}</p>
+      </div>
+      <div class="result" id="result${q.id}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showHint(qid){
+  const q = questions.find(x=>x.id===qid);
+  const box = document.getElementById('hintbox'+qid);
+  const idx = hintState[qid] % 3;
+  box.style.display = 'block';
+  box.innerHTML = `<b>Hint ${idx+1}/3:</b> ${q.hints[idx]}`;
+  hintState[qid]++;
+}
+
+function toggleAnswer(qid){
+  const box = document.getElementById('answerbox'+qid);
+  box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+}
+
+function normalize(text){
+  return text.split('\n').map(l => l.replace(/\s+$/,'')).join('\n').trim();
+}
+
+function runCode(qid){
+  const q = questions.find(x=>x.id===qid);
+  const code = document.getElementById('code'+qid).value;
+  const resultBox = document.getElementById('result'+qid);
+  let outputAccum = '';
+
+  function outf(text){ outputAccum += text; }
+  function builtinRead(x){
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined){
+      throw "File not found: '" + x + "'";
+    }
+    return Sk.builtinFiles["files"][x];
+  }
+
+  Sk.configure({output: outf, read: builtinRead, __future__: Sk.python3});
+
+  const promise = Sk.misceval.asyncToPromise(function(){
+    return Sk.importMainWithBody("<stdin>", false, code, true);
+  });
+
+  promise.then(
+    function(){
+      const actual = normalize(outputAccum);
+      const expected = normalize(q.expected);
+      if (actual === expected){
+        resultBox.className = 'result ok';
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `<span class="out-label">✅ Correct!</span>Your output:\n${outputAccum || '(nothing printed)'}`;
+        markSolved(qid);
+      } else {
+        resultBox.className = 'result err';
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = `<span class="out-label">❌ Not quite yet.</span>Your output:\n${outputAccum || '(nothing printed)'}\n\nExpected:\n${q.expected}`;
+      }
+    },
+    function(err){
+      resultBox.className = 'result err';
+      resultBox.style.display = 'block';
+      resultBox.innerHTML = `<span class="out-label">⚠ Error running code:</span>${err.toString()}`;
+    }
+  );
+}
+
+function markSolved(qid){
+  const card = document.getElementById('card'+qid);
+  if (!card.classList.contains('solved')){
+    card.classList.add('solved');
+    solvedCount++;
+    document.getElementById('progress').textContent = `Solved: ${solvedCount} / 10`;
+  }
+  heartBomb();
+}
+
+function heartBomb(){
+  const overlay = document.createElement('div');
+  overlay.id = 'heart-overlay';
+  document.body.appendChild(overlay);
+
+  const hearts = ['❤️','💖','💕','💗','💘'];
+  for (let i=0; i<36; i++){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+    h.style.left = Math.random()*100 + 'vw';
+    h.style.animationDelay = (Math.random()*0.4) + 's';
+    h.style.fontSize = (20 + Math.random()*22) + 'px';
+    overlay.appendChild(h);
+  }
+
+  const msg = document.createElement('div');
+  msg.className = 'best-msg';
+  msg.textContent = 'You are the Best! 🎉';
+  document.body.appendChild(msg);
+
+  setTimeout(() => {
+    overlay.remove();
+    msg.remove();
+  }, 2100);
+}
+
+buildUI();
+</script>
+</body>
+</html>
