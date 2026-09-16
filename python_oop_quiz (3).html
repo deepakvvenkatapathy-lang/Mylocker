@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python OOP — Learn &amp; Practice</title>
+
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
+
+<style>
+  :root{
+    --bg1:#1e1b4b; --bg2:#312e81; --accent:#f472b6; --accent2:#a78bfa;
+    --card:#ffffff; --text-dark:#1f2333; --good:#22c55e; --bulb:#fbbf24;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',Roboto,Arial,sans-serif;
+    background:linear-gradient(135deg,var(--bg1),var(--bg2) 60%,#701a75);
+    color:#eef;min-height:100vh;padding-bottom:60px;}
+  header{text-align:center;padding:36px 20px 10px;}
+  header h1{font-size:2.1rem;margin:0 0 6px;
+    background:linear-gradient(90deg,#f472b6,#a78bfa,#60a5fa);
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  header p{color:#c7c9e0;margin:0;font-size:.95rem;}
+
+  .tabbar{display:flex;justify-content:center;gap:12px;margin:24px auto 26px;flex-wrap:wrap;padding:0 16px;}
+  .tab{background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.22);
+    color:#e9e9ff;padding:12px 28px;border-radius:30px;font-size:1rem;font-weight:700;
+    cursor:pointer;transition:all .25s;}
+  .tab:hover{background:rgba(255,255,255,.18);transform:translateY(-2px);}
+  .tab.active{background:linear-gradient(135deg,#f472b6,#a78bfa);border-color:transparent;
+    color:#fff;box-shadow:0 6px 20px rgba(244,114,182,.45);}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;animation:fadeIn .35s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .container{max-width:920px;margin:0 auto;padding:0 18px;display:flex;flex-direction:column;gap:26px;}
+  #progress{text-align:center;font-size:1.05rem;margin:0 auto 24px;color:#fef08a;font-weight:600;}
+
+  /* ---------- QUIZ ---------- */
+  .card{background:var(--card);color:var(--text-dark);border-radius:16px;padding:22px 24px 26px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);border:2px solid transparent;transition:border-color .3s;}
+  .card.solved{border-color:var(--good);}
+  .qtitle{font-size:1.15rem;font-weight:700;color:#312e81;}
+  .qbadge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-left:8px;text-transform:uppercase;}
+  .badge-easy{background:#d1fae5;color:#047857;}
+  .badge-medium{background:#fef3c7;color:#b45309;}
+  .qdesc{font-size:.95rem;color:#374151;margin:8px 0 6px;line-height:1.6;}
+  .goal{background:#f1f5f9;border-left:4px solid #64748b;padding:8px 12px;border-radius:8px;
+    font-size:.85rem;color:#334155;margin:0 0 14px;font-family:monospace;}
+  .btnrow{display:flex;align-items:center;gap:10px;margin:4px 0 14px;flex-wrap:wrap;}
+  .icon-btn{border:none;cursor:pointer;border-radius:50%;width:44px;height:44px;font-size:1.3rem;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.25);transition:transform .15s;}
+  .icon-btn:hover{transform:scale(1.08);} .icon-btn:active{transform:scale(.94);}
+  .hint-btn{background:radial-gradient(circle at 35% 30%,#fff7cc,var(--bulb) 70%);color:#78350f;animation:pulseGlow 1.6s infinite;}
+  @keyframes pulseGlow{0%{box-shadow:0 0 0 0 rgba(251,191,36,.7);}70%{box-shadow:0 0 0 12px rgba(251,191,36,0);}100%{box-shadow:0 0 0 0 rgba(251,191,36,0);}}
+  .answer-btn{background:linear-gradient(135deg,#a78bfa,#818cf8);color:#fff;}
+  .run-btn{background:linear-gradient(135deg,#34d399,#059669);color:#fff;border:none;border-radius:10px;
+    padding:10px 20px;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.25);}
+  .hint-tag,.answer-tag{font-size:.8rem;color:#6b7280;font-weight:600;}
+  textarea{width:100%;min-height:150px;background:#0f172a;color:#e2e8f0;
+    font-family:'Consolas','Courier New',monospace;font-size:.92rem;border-radius:10px;
+    border:1px solid #334155;padding:14px;resize:vertical;line-height:1.5;}
+  .hintbox{display:none;margin-top:10px;background:#fffbeb;border-left:4px solid var(--bulb);padding:10px 14px;border-radius:8px;font-size:.9rem;color:#78350f;}
+  .answerbox{display:none;margin-top:10px;background:#eef2ff;border-left:4px solid var(--accent2);padding:12px 14px;border-radius:8px;font-size:.88rem;color:#312e81;}
+  .answerbox pre{background:#1e1b4b;color:#e0e7ff;padding:10px;border-radius:8px;overflow-x:auto;font-size:.82rem;}
+  .result{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:.9rem;font-weight:600;white-space:pre-wrap;display:none;}
+  .result.ok{display:block;background:#dcfce7;color:#166534;border:1px solid #86efac;}
+  .result.err{display:block;background:#fee2e2;color:#991b1b;border:1px solid #fca5a5;}
+  .out-label{font-weight:700;display:block;margin-bottom:4px;}
+
+  /* ---------- STORY ---------- */
+  .story-intro{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+    border-radius:16px;padding:22px 26px;line-height:1.8;font-size:1rem;color:#e6e6ff;}
+  .story-intro h2{margin-top:0;color:#fbcfe8;font-size:1.35rem;}
+  .story-card{background:var(--card);color:var(--text-dark);border-radius:16px;padding:24px 26px 28px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);border-left:8px solid var(--accent2);}
+  .story-card h3{margin:0 0 4px;font-size:1.25rem;color:#312e81;}
+  .chapter{font-size:.75rem;letter-spacing:1.5px;font-weight:800;color:#a78bfa;text-transform:uppercase;}
+  .story-card .scene{background:#fdf2f8;border-left:4px solid var(--accent);padding:14px 16px;
+    border-radius:10px;margin:14px 0;font-size:.97rem;line-height:1.85;color:#500724;}
+  .simple{background:#eff6ff;border-left:4px solid #3b82f6;padding:12px 16px;border-radius:10px;
+    margin:14px 0;font-size:.97rem;line-height:1.8;color:#1e3a8a;}
+  .simple b{color:#1d4ed8;}
+  .story-card .takeaway{background:#ecfdf5;border-left:4px solid var(--good);padding:12px 16px;
+    border-radius:10px;margin:14px 0 0;font-size:.93rem;color:#065f46;line-height:1.7;}
+  .story-card p{line-height:1.8;font-size:.95rem;color:#374151;}
+  .story-card pre{background:#1e1b4b;color:#e0e7ff;padding:14px;border-radius:10px;overflow-x:auto;
+    font-size:.84rem;line-height:1.6;font-family:'Consolas','Courier New',monospace;}
+  .out-note{font-size:.86rem;color:#6b7280;font-style:italic;margin-top:-4px;}
+  .word{background:#fef3c7;padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.88em;color:#78350f;}
+
+  /* ---------- SCENE PLAYER ("video") ---------- */
+  .player{border-radius:14px;overflow:hidden;border:1px solid #3730a3;margin:16px 0 8px;
+    background:linear-gradient(160deg,#0f172a,#1e1b4b);}
+  .pbar{display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;background:rgba(255,255,255,.06);font-size:.74rem;color:#a5b4fc;
+    font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+  .dots{display:flex;gap:6px;}
+  .dot{width:8px;height:8px;border-radius:50%;background:#4338ca;transition:all .3s;}
+  .dot.on{background:#f472b6;transform:scale(1.3);}
+  .pstage{min-height:190px;display:flex;align-items:center;justify-content:center;
+    gap:16px;padding:18px 16px;flex-wrap:wrap;}
+  .pnarr{background:rgba(0,0,0,.35);padding:12px 16px;color:#e0e7ff;font-size:.93rem;
+    line-height:1.6;min-height:58px;border-top:1px solid #3730a3;}
+  .pnarr b{color:#fbbf24;}
+  .pctrl{display:flex;gap:8px;align-items:center;padding:10px 12px;background:rgba(255,255,255,.04);}
+  .pctrl button{background:#4338ca;border:none;color:#e0e7ff;border-radius:8px;padding:7px 14px;
+    font-size:.82rem;font-weight:700;cursor:pointer;transition:.2s;}
+  .pctrl button:hover{background:#6366f1;}
+  .pctrl .play{background:linear-gradient(135deg,#f472b6,#a78bfa);}
+  .pctrl .step-lbl{margin-left:auto;font-size:.76rem;color:#a5b4fc;}
+
+  .obj{font-size:46px;line-height:1;animation:pop .45s ease both;}
+  .obj.sm{font-size:34px;}
+  .box{background:#fef3c7;color:#78350f;border-radius:8px;padding:8px 12px;font-size:.78rem;
+    font-weight:700;font-family:monospace;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.4);
+    animation:pop .45s ease both;}
+  .box.dark{background:#312e81;color:#e0e7ff;}
+  .box.green{background:#065f46;color:#d1fae5;}
+  .box.pink{background:#9d174d;color:#fce7f3;}
+  .box.grey{background:#374151;color:#d1d5db;}
+  .arrow{color:#a78bfa;font-size:28px;animation:pop .45s ease both;}
+  .col{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .tag{font-size:.68rem;color:#818cf8;letter-spacing:.5px;}
+  @keyframes pop{0%{opacity:0;transform:scale(.5) translateY(14px);}70%{transform:scale(1.08);}100%{opacity:1;transform:scale(1);}}
+  .fade{animation:fadeS .5s ease both;}
+  @keyframes fadeS{from{opacity:0;}to{opacity:1;}}
+
+  /* ---------- HEART BOMB ---------- */
+  #heart-overlay{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden;}
+  .heart{position:absolute;bottom:-40px;font-size:28px;animation:floatUp 1.8s ease-out forwards;}
+  @keyframes floatUp{0%{transform:translateY(0) scale(.6);opacity:1;}100%{transform:translateY(-100vh) scale(1.3) rotate(25deg);opacity:0;}}
+  .best-msg{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:2.4rem;font-weight:800;
+    color:#fff;text-shadow:0 0 20px #f472b6,0 0 40px #a78bfa;z-index:10000;opacity:0;
+    animation:popMsg 2s ease forwards;pointer-events:none;text-align:center;}
+  @keyframes popMsg{0%{opacity:0;transform:translate(-50%,-50%) scale(.3);}20%{opacity:1;transform:translate(-50%,-50%) scale(1.15);}35%{transform:translate(-50%,-50%) scale(1);}80%{opacity:1;}100%{opacity:0;}}
+  footer{text-align:center;color:#c7c9e0;font-size:.85rem;margin-top:40px;padding:0 18px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐍 Python OOP — Learn &amp; Practice</h1>
+  <p>Made for absolute beginners. Watch the scene play step by step, then try the code yourself.</p>
+</header>
+
+<div class="tabbar">
+  <button class="tab active" id="tab-quiz" onclick="switchTab('quiz')">📝 Quiz</button>
+  <button class="tab" id="tab-story" onclick="switchTab('story')">📖 Explanation</button>
+</div>
+
+<div class="tabpanel active" id="panel-quiz">
+  <div id="progress">Solved: 0 / 10</div>
+  <div class="container" id="quiz-container"></div>
+  <footer>Tip: click 💡 for hints, 📖 for the full answer. Get it right to see the magic ✨</footer>
+</div>
+
+<div class="tabpanel" id="panel-story">
+  <div class="container" id="story-container"></div>
+</div>
+
+<script>
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============================================================
+   SCENE PLAYER — plays each scene step by step, like a short video
+   ============================================================ */
+const players = {};
+
+function makePlayer(id, steps){
+  players[id] = {steps:steps, i:0, timer:null, playing:false};
+  return `
+  <div class="player" id="player-${id}">
+    <div class="pbar">
+      <span>▶ Scene ${id}</span>
+      <span class="dots" id="dots-${id}"></span>
+    </div>
+    <div class="pstage" id="stage-${id}"></div>
+    <div class="pnarr" id="narr-${id}"></div>
+    <div class="pctrl">
+      <button class="play" onclick="playScene(${id})">▶ Play</button>
+      <button onclick="stepScene(${id},-1)">◀ Back</button>
+      <button onclick="stepScene(${id},1)">Next ▶</button>
+      <span class="step-lbl" id="lbl-${id}"></span>
+    </div>
+  </div>`;
+}
+
+function renderStep(id){
+  const p = players[id];
+  const s = p.steps[p.i];
+  document.getElementById('stage-'+id).innerHTML = s.html;
+  document.getElementById('narr-'+id).innerHTML = s.narr;
+  document.getElementById('lbl-'+id).textContent = `Step ${p.i+1} of ${p.steps.length}`;
+  const dots = p.steps.map((_,k)=>`<span class="dot ${k===p.i?'on':''}"></span>`).join('');
+  document.getElementById('dots-'+id).innerHTML = dots;
+}
+
+function stepScene(id, dir){
+  const p = players[id];
+  clearInterval(p.timer); p.playing=false;
+  p.i = Math.min(p.steps.length-1, Math.max(0, p.i+dir));
+  renderStep(id);
+}
+
+function playScene(id){
+  const p = players[id];
+  clearInterval(p.timer);
+  p.i = 0; renderStep(id); p.playing = true;
+  p.timer = setInterval(()=>{
+    if(p.i >= p.steps.length-1){ clearInterval(p.timer); p.playing=false; return; }
+    p.i++; renderStep(id);
+  }, 3000);
+}
+
+/* ============================================================
+   SCENES — one per concept, 4–5 simple steps each
+   ============================================================ */
+const scenes = {
+1:[
+ {html:`<div class="col"><div class="obj">📋</div><div class="box">RECIPE CARD</div><span class="tag">stuck near the stove</span></div>`,
+  narr:`A tea recipe is written on a <b>card</b>. It is only paper. It tells you how to make tea.`},
+ {html:`<div class="col"><div class="obj">📋</div><div class="box">RECIPE CARD</div></div><span class="arrow">➜</span><div class="col"><div class="obj">☕</div><div class="box green">CUP 1</div></div>`,
+  narr:`A customer comes. You read the card and make <b>one real cup</b>.`},
+ {html:`<div class="col"><div class="obj">📋</div><div class="box">RECIPE CARD</div></div><span class="arrow">➜</span><div class="col"><div class="obj">☕</div><div class="box green">CUP 1</div></div><div class="col"><div class="obj">☕</div><div class="box green">CUP 2</div></div><div class="col"><div class="obj">☕</div><div class="box green">CUP 3</div></div>`,
+  narr:`More customers come. Same card → <b>many real cups</b>. The card is never used up.`},
+ {html:`<div class="col"><div class="obj">📋</div><div class="box grey">you can't drink this</div></div><span class="arrow">vs</span><div class="col"><div class="obj">☕</div><div class="box green">you CAN drink this</div></div>`,
+  narr:`Remember this: you cannot <b>drink the card</b>. You drink the cup.`},
+ {html:`<div class="col"><div class="obj">📋</div><div class="box dark">class Tea:</div><span class="tag">= the CARD</span></div><span class="arrow">➜</span><div class="col"><div class="obj">☕</div><div class="box dark">cup = Tea()</div><span class="tag">= the CUP</span></div>`,
+  narr:`In Python: the card is a <b>class</b>. The cup is an <b>object</b>. That's the whole idea.`}
+],
+2:[
+ {html:`<div class="col"><div class="obj">🙋</div><div class="box pink">"2 sugar,<br>strong"</div></div>`,
+  narr:`A customer sits down and says how they want the tea: <b>2 sugar, strong</b>.`},
+ {html:`<div class="col"><div class="obj">🙋</div><div class="box pink">"2 sugar,<br>strong"</div></div><span class="arrow">➜</span><div class="col"><div class="obj">📝</div><div class="box dark">__init__<br>writes it down</div></div>`,
+  narr:`You write it down <b>before</b> making anything. This writing-down step is <b>__init__</b>.`},
+ {html:`<div class="col"><div class="obj sm">📝</div><div class="box dark">self.sugar = 2<br>self.strength = "strong"</div><span class="tag">saved inside this cup</span></div>`,
+  narr:`The words <b>self.sugar</b> mean "the sugar of THIS cup" — not any other cup.`},
+ {html:`<div class="col"><div class="obj">☕</div><div class="box green">2 sugar · strong</div><span class="tag">correct from birth</span></div>`,
+  narr:`Now the cup is made <b>correct the first time</b>. No fixing afterwards.`},
+ {html:`<div class="col"><div class="obj">☕</div><div class="box green">cup1<br>2 sugar</div></div><div class="col"><div class="obj">☕</div><div class="box green">cup2<br>0 sugar</div></div>`,
+  narr:`Every cup keeps <b>its own</b> details. cup1 and cup2 never mix up.`}
+],
+3:[
+ {html:`<div class="col"><div class="obj">☕</div><div class="box">sugar = 2</div><span class="tag">cup 1's own</span></div>`,
+  narr:`This cup has <b>2 sugar</b>. That belongs to this cup only.`},
+ {html:`<div class="col"><div class="obj">☕</div><div class="box">sugar=2</div></div><div class="col"><div class="obj">☕</div><div class="box">sugar=1</div></div><div class="col"><div class="obj">☕</div><div class="box">sugar=0</div></div>`,
+  narr:`Three cups, three <b>different</b> sugar values. Each one is private to its cup.`},
+ {html:`<div class="col"><div class="obj">🧾</div><div class="box green">CHALKBOARD<br>cups_sold = 0</div><span class="tag">one board for the whole shop</span></div>`,
+  narr:`On the wall there is <b>one chalkboard</b>. It counts cups sold today.`},
+ {html:`<div class="col"><div class="obj sm">☕</div></div><span class="arrow">➜</span><div class="col"><div class="obj sm">☕</div></div><span class="arrow">➜</span><div class="col"><div class="obj sm">☕</div></div><span class="arrow">➜</span><div class="col"><div class="obj">🧾</div><div class="box green">cups_sold = 3</div></div>`,
+  narr:`Every cup adds <b>1</b> to that same board. Three cups → the board shows 3.`},
+ {html:`<div class="col"><div class="box">self.sugar</div><span class="tag">MINE only</span></div><span class="arrow">vs</span><div class="col"><div class="box green">Tea.cups_sold</div><span class="tag">SHARED by all</span></div>`,
+  narr:`<b>self.x</b> = belongs to one object. <b>ClassName.x</b> = shared by everybody.`}
+],
+4:[
+ {html:`<div class="col"><div class="obj">🏪</div><div class="box">SHOP 1</div></div><div class="col"><div class="obj sm">📕</div><div class="box dark">RULEBOOK<br>greet() · bill()</div></div>`,
+  narr:`Shop 1 has a <b>rulebook</b>: how to greet, how to bill, how to clean.`},
+ {html:`<div class="col"><div class="obj">🏪</div><div class="box">SHOP 2</div><span class="tag">just opened — empty</span></div>`,
+  narr:`A <b>second shop</b> opens. It knows nothing yet.`},
+ {html:`<div class="col"><div class="obj sm">📕</div><div class="box dark">RULEBOOK</div></div><span class="arrow">➜</span><div class="col"><div class="obj">🏪</div><div class="box green">SHOP 2<br>✔ greet() ✔ bill()</div></div>`,
+  narr:`You hand it the <b>same rulebook</b>. Nothing is rewritten. It just works.`},
+ {html:`<div class="col"><div class="box dark">class Shop:</div><span class="tag">parent</span></div><span class="arrow">➜</span><div class="col"><div class="box green">class BranchTwo(Shop):</div><span class="tag">child — gets everything</span></div>`,
+  narr:`In Python that bracket — <b>BranchTwo(Shop)</b> — is the handing-over of the rulebook.`}
+],
+5:[
+ {html:`<div class="col"><div class="obj">🏪</div><div class="box">"Welcome to<br>our shop!"</div><span class="tag">from the rulebook</span></div>`,
+  narr:`Every shop greets the same way, from the rulebook.`},
+ {html:`<div class="col"><div class="obj">🎓</div><div class="box pink">near a college</div></div>`,
+  narr:`But one shop is <b>near a college</b>. Students find that greeting too formal.`},
+ {html:`<div class="col"><div class="obj">🎓</div><div class="box grey" style="text-decoration:line-through;">"Welcome to our shop!"</div><div class="box green">"Hey! Usual tea?"</div></div>`,
+  narr:`So that shop <b>replaces only the greeting</b>. Everything else stays the same.`},
+ {html:`<div class="col"><div class="obj sm">🏪</div><div class="box">"Welcome to our shop!"</div><span class="tag">other shops</span></div><div class="col"><div class="obj sm">🎓</div><div class="box green">"Hey! Usual tea?"</div><span class="tag">college shop</span></div>`,
+  narr:`Same method name <b>greet()</b>, different words. This is called <b>overriding</b>.`}
+],
+6:[
+ {html:`<div class="col"><div class="obj">🪙</div><div class="box pink">OPEN TRAY</div><span class="tag">money sits on the counter</span></div>`,
+  narr:`At first, the money sits in an <b>open tray</b>. Anyone can touch it.`},
+ {html:`<div class="col"><div class="obj">🪙</div><div class="box pink">OPEN TRAY</div></div><span class="arrow">➜</span><div class="col"><div class="obj">💸</div><div class="box grey">money missing!</div></div>`,
+  narr:`One evening the total <b>doesn't match</b>. Somebody changed it.`},
+ {html:`<div class="col"><div class="obj">🔐</div><div class="box green">LOCKED BOX<br>__balance</div><span class="tag">hidden inside</span></div>`,
+  narr:`Now the money goes in a <b>locked box</b>. Nobody reaches in directly.`},
+ {html:`<div class="col"><div class="obj sm">🙋</div><div class="box">"how much?"</div></div><span class="arrow">➜</span><div class="col"><div class="box dark">get_balance()</div><span class="tag">the only door</span></div><span class="arrow">➜</span><div class="col"><div class="box green">500</div></div>`,
+  narr:`Want to know the total? You must <b>ask through a method</b>. That method is the only door.`},
+ {html:`<div class="col"><div class="box pink">deposit(-100)</div></div><span class="arrow">➜</span><div class="col"><div class="obj">🚫</div><div class="box grey">refused</div></div>`,
+  narr:`And the door can <b>check</b> — a negative amount gets refused. That safety is the real point.`}
+],
+7:[
+ {html:`<div class="col"><div class="obj">📢</div><div class="box pink">"prepare()"</div><span class="tag">one single word</span></div>`,
+  narr:`You shout <b>one word</b> to the kitchen: "prepare!"`},
+ {html:`<div class="col"><div class="obj sm">📢</div><div class="box pink">prepare()</div></div><span class="arrow">➜</span><div class="col"><div class="obj">☕</div><div class="box green">boils milk</div></div>`,
+  narr:`The tea boy hears it and <b>boils milk</b>.`},
+ {html:`<div class="col"><div class="obj sm">📢</div><div class="box pink">prepare()</div></div><span class="arrow">➜</span><div class="col"><div class="obj sm">☕</div><div class="box green">boils milk</div></div><div class="col"><div class="obj sm">🫖</div><div class="box green">runs filter</div></div><div class="col"><div class="obj sm">🍋</div><div class="box green">squeezes lime</div></div>`,
+  narr:`Same word, but tea, coffee and lime each do <b>their own thing</b>.`},
+ {html:`<div class="col"><div class="box dark">for drink in [Tea(), Coffee(), Lime()]:<br>&nbsp;&nbsp;&nbsp;&nbsp;drink.prepare()</div><span class="tag">no if-else anywhere</span></div>`,
+  narr:`Notice: the code never asks "which drink is this?" Python figures it out. That's <b>polymorphism</b>.`}
+],
+8:[
+ {html:`<div class="col"><div class="obj">🧮</div><div class="box">CALCULATOR<br>on the wall</div></div>`,
+  narr:`A small <b>calculator</b> hangs on the wall near billing.`},
+ {html:`<div class="col"><div class="obj sm">☕</div><div class="box grey">not mine</div></div><div class="col"><div class="obj sm">🙋</div><div class="box grey">not mine</div></div><div class="col"><div class="obj">🧮</div><div class="box">belongs to nobody</div></div>`,
+  narr:`It doesn't belong to any cup or any customer. It just <b>does maths</b>.`},
+ {html:`<div class="col"><div class="box dark">Billing.add(40, 25)</div><span class="tag">no object created!</span></div><span class="arrow">➜</span><div class="col"><div class="box green" style="font-size:1.1rem;">65</div></div>`,
+  narr:`So you can use it <b>straight from the class</b> — no object needed at all.`},
+ {html:`<div class="col"><div class="box dark">@staticmethod<br>def add(a, b):<br>&nbsp;&nbsp;&nbsp;&nbsp;return a + b</div><span class="tag">no "self" anywhere</span></div>`,
+  narr:`If a method never uses <b>self</b>, make it a <b>@staticmethod</b>. Simple rule.`}
+],
+9:[
+ {html:`<div class="col"><div class="obj">🧾</div><div class="box grey">&lt;Order object<br>at 0x7f3a&gt;</div><span class="tag">printed slip</span></div>`,
+  narr:`The bill machine prints this. Nobody can <b>read</b> it.`},
+ {html:`<div class="col"><div class="obj sm">🙋</div><div class="box pink">"what is<br>this?!"</div></div><div class="col"><div class="obj">🧾</div><div class="box grey">&lt;Order object...&gt;</div></div>`,
+  narr:`The customer is confused. The delivery boy is confused. Useless slip.`},
+ {html:`<div class="col"><div class="box dark">def __str__(self):<br>&nbsp;&nbsp;&nbsp;&nbsp;return "Order: 2 Tea, 1 Coffee"</div><span class="tag">you decide the wording</span></div>`,
+  narr:`So you add <b>__str__</b> — it tells Python what to show when printing.`},
+ {html:`<div class="col"><div class="obj">🧾</div><div class="box green">Order: 2 Tea,<br>1 Coffee</div><span class="tag">readable!</span></div>`,
+  narr:`Now <b>every slip</b> in the shop is readable. One method fixed it all.`}
+],
+10:[
+ {html:`<div class="col"><div class="obj">📕</div><div class="box">RULE:<br>every branch must bill</div></div>`,
+  narr:`A rule is written: <b>every branch must have billing</b>.`},
+ {html:`<div class="col"><div class="obj sm">📕</div><div class="box pink">HOW? — not said</div></div>`,
+  narr:`But the rule does <b>not</b> say how. Each branch decides its own way.`},
+ {html:`<div class="col"><div class="obj sm">💳</div><div class="box green">card machine</div></div><div class="col"><div class="obj sm">📒</div><div class="box green">paper book</div></div><div class="col"><div class="obj sm">📱</div><div class="box green">UPI app</div></div>`,
+  narr:`Three branches, <b>three different ways</b> — all follow the same rule.`},
+ {html:`<div class="col"><div class="obj">🏪</div><div class="box grey">"we don't bill"</div></div><span class="arrow">➜</span><div class="col"><div class="obj">🚫</div><div class="box pink">cannot open</div></div>`,
+  narr:`A branch that skips billing <b>cannot open</b>. The rule is not optional.`},
+ {html:`<div class="col"><div class="box dark">class Branch:<br>&nbsp;&nbsp;def bill(self):<br>&nbsp;&nbsp;&nbsp;&nbsp;raise NotImplementedError</div><span class="tag">says WHAT, not HOW</span></div>`,
+  narr:`In Python, that's <b>abstraction</b>: the parent demands the method, the child writes it.`}
+]
+};
+
+/* ============================================================
+   STORY CHAPTERS
+   ============================================================ */
+const chapters = [
+{
+ n:1, title:"🏗️ Class and Object — the recipe card and the real cup",
+ scene:`On day one, the tea recipe is written on a card and stuck near the stove.<br><br>
+ A customer comes in. You read the card and make a cup. Another customer comes. You read the
+ <b>same card</b> and make another cup. The card never runs out.<br><br>
+ And here is the simple truth: <b>you cannot drink the card.</b> The card is instructions.
+ The cup is the real thing.`,
+ simple:`<b>In simple words:</b><br>
+ A <b>class</b> is a plan. It is written once. It does nothing by itself.<br>
+ An <b>object</b> is a real thing made from that plan. You can use it.<br><br>
+ Plan = <span class="word">class Tea:</span> &nbsp;·&nbsp; Real thing = <span class="word">cup = Tea()</span>`,
+ code:`class Tea:                 # the plan (recipe card)
+    def serve(self):
+        print("Here is your hot tea!")
+
+cup = Tea()                # make a real cup
+cup.serve()                # use it`,
+ out:`Here is your hot tea!`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">class Tea:</span> — start writing the plan, name it Tea.<br>
+ • <span class="word">def serve(self):</span> — one thing this cup can do.<br>
+ • <span class="word">cup = Tea()</span> — the brackets <b>()</b> actually make a real cup.<br>
+ • <span class="word">cup.serve()</span> — the dot means "this cup, do that thing".`,
+ take:`A class alone does nothing. You must write <b>Tea()</b> with brackets to get a real object.`
+},
+{
+ n:2, title:"🎬 __init__ — asking 'how do you want it?' first",
+ scene:`At first you made plain tea, then fixed it after: add sugar, boil it stronger. Slow, and wasteful.<br><br>
+ So you changed one habit. Now you ask <b>the moment the customer sits down</b> — before pouring
+ anything. Sugar and strength are decided at the start. The cup is made right the first time.`,
+ simple:`<b>In simple words:</b><br>
+ <span class="word">__init__</span> is the "ask first" step. Python runs it <b>automatically</b> the moment
+ you create an object.<br><br>
+ <span class="word">self</span> simply means <b>"this one"</b> — this cup, not any other cup.
+ So <span class="word">self.sugar</span> = "the sugar of this cup".`,
+ code:`class Tea:
+    def __init__(self, sugar, strength):
+        self.sugar = sugar             # save into THIS cup
+        self.strength = strength
+
+    def serve(self):
+        print(f"Tea with {self.sugar} sugar, {self.strength} strength")
+
+cup1 = Tea(2, "strong")
+cup2 = Tea(0, "light")
+cup1.serve()
+cup2.serve()`,
+ out:`Tea with 2 sugar, strong strength
+Tea with 0 sugar, light strength`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">Tea(2, "strong")</span> — you pass the order in the brackets.<br>
+ • Those values land in <span class="word">__init__</span> as sugar and strength.<br>
+ • <span class="word">self.sugar = sugar</span> — store it inside that cup so it's remembered.<br>
+ • Later, <span class="word">self.sugar</span> reads it back.`,
+ take:`Two cups made from the same class hold <b>different</b> values. They never mix up, because each has its own <b>self</b>.`
+},
+{
+ n:3, title:"🔢 Class variable vs instance variable — my cup vs the shop's board",
+ scene:`Two kinds of records sit behind the counter.<br><br>
+ First, <b>each cup has its own details</b> — this one has 2 sugar, that one has none.<br><br>
+ Second, there is <b>one chalkboard on the wall</b> with a tally for every cup sold today.
+ It belongs to the shop, not to any cup. Every cup adds to the same board.`,
+ simple:`<b>In simple words:</b><br>
+ • <span class="word">self.sugar</span> → belongs to <b>one</b> object. Everyone has their own.<br>
+ • <span class="word">Tea.cups_sold</span> → <b>one copy shared</b> by all objects.<br><br>
+ Own thing = instance variable. Shared thing = class variable.`,
+ code:`class Tea:
+    cups_sold = 0                  # the shared chalkboard
+
+    def __init__(self, sugar):
+        self.sugar = sugar         # this cup only
+        Tea.cups_sold += 1         # add to the shared board
+
+Tea(2)
+Tea(1)
+Tea(0)
+print(Tea.cups_sold)`,
+ out:`3`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">cups_sold = 0</span> sits directly under the class — that makes it shared.<br>
+ • <span class="word">self.sugar</span> sits inside __init__ with self — that makes it personal.<br>
+ • <span class="word">Tea.cups_sold += 1</span> — written with the class name, so it updates the one board.<br>
+ • Three cups made → the board reads 3.`,
+ take:`Use a class variable for totals and counters that belong to the <b>whole class</b>, not to one object.`
+},
+{
+ n:4, title:"👨‍👩‍👧 Inheritance — the new shop gets the same rulebook",
+ scene:`A second shop opens across town.<br><br>
+ Nobody sits down to reinvent how to greet a customer or how to bill. The new manager simply gets
+ <b>the same rulebook</b> the first shop already uses.<br><br>
+ Day one, and the new shop already knows everything.`,
+ simple:`<b>In simple words:</b><br>
+ <b>Inheritance</b> = a new class <b>gets everything</b> from an old class, for free.<br><br>
+ Write the old class name in brackets: <span class="word">class BranchTwo(Shop):</span><br>
+ That's it. BranchTwo now has all of Shop's methods without copying anything.`,
+ code:`class Shop:                    # parent (old rulebook)
+    def greet(self):
+        print("Welcome to our shop!")
+
+class BranchTwo(Shop):         # child — gets everything
+    pass                       # nothing new added
+
+b = BranchTwo()
+b.greet()`,
+ out:`Welcome to our shop!`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">class BranchTwo(Shop):</span> — the brackets mean "take everything from Shop".<br>
+ • <span class="word">pass</span> just means "I have nothing extra to add".<br>
+ • <span class="word">b.greet()</span> works even though BranchTwo never wrote greet().<br>
+ • Python looks up to the parent and finds it there.`,
+ take:`Write code once in the parent, and every child gets it. Less typing, fewer mistakes.`
+},
+{
+ n:5, title:"✏️ Overriding — one shop does it differently",
+ scene:`One of the shops is near a college. The students find the formal greeting odd.<br><br>
+ So that shop changes <b>only the greeting</b>. Billing, cleaning, closing time — all still follow
+ the rulebook. Just one line is replaced.`,
+ simple:`<b>In simple words:</b><br>
+ <b>Overriding</b> = the child writes a method with the <b>same name</b> as the parent's.<br><br>
+ Python then uses the <b>child's version</b> and ignores the parent's — but only for that one method.`,
+ code:`class Shop:
+    def greet(self):
+        print("Welcome to our shop!")
+
+class CollegeBranch(Shop):
+    def greet(self):                   # SAME name, new words
+        print("Hey! Usual tea?")
+
+CollegeBranch().greet()
+Shop().greet()`,
+ out:`Hey! Usual tea?
+Welcome to our shop!`,
+ lines:`<b>Line by line:</b><br>
+ • Both classes have a method called <span class="word">greet</span>. Same name on purpose.<br>
+ • Python checks the child first. It finds greet() there, so it uses that.<br>
+ • The parent's greet() is untouched — other shops still use it.<br>
+ • Nothing was deleted; the child just has its own version.`,
+ take:`Overriding lets one child behave differently <b>without breaking</b> anyone else.`
+},
+{
+ n:6, title:"🔒 Encapsulation — put the cash in a locked box",
+ scene:`At first the money sat in an open tray on the counter. One evening the total didn't match —
+ someone had "adjusted" it.<br><br>
+ The next day: a <b>locked box under the counter</b>. Want the total? Ask. Want to add money?
+ Hand it over and it goes in — after checking it's a real note and refusing a negative amount.`,
+ simple:`<b>In simple words:</b><br>
+ <b>Encapsulation</b> = hide the data, and give people a <b>method</b> to use it instead.<br><br>
+ Two underscores in front — <span class="word">__balance</span> — means "private, do not touch from outside".<br>
+ A method like <span class="word">get_balance()</span> becomes the only safe door in.`,
+ code:`class CashBox:
+    def __init__(self, amount):
+        self.__balance = amount        # private — locked away
+
+    def get_balance(self):             # safe way to LOOK
+        return self.__balance
+
+    def deposit(self, amount):         # safe way to ADD
+        if amount > 0:                 # the check!
+            self.__balance += amount
+
+box = CashBox(500)
+box.deposit(200)
+box.deposit(-999)                      # refused
+print(box.get_balance())`,
+ out:`700`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">self.__balance</span> — the two underscores hide it from outside code.<br>
+ • <span class="word">get_balance()</span> returns the value so people can still read it.<br>
+ • <span class="word">if amount > 0</span> — this check can <b>never be skipped</b>.<br>
+ • The -999 deposit is quietly refused, so the total stays 700.`,
+ take:`Hiding the data isn't the goal — the <b>check inside the method</b> is. That's what keeps the data safe.`
+},
+{
+ n:7, title:"🎭 Polymorphism — one word, different drinks",
+ scene:`The shop now sells tea, coffee and lime juice.<br><br>
+ At the counter you shout <b>one single word</b> to the kitchen: "Prepare!"<br><br>
+ The tea boy boils milk. The coffee machine runs a filter. The juice boy squeezes a lime.
+ Same word, three different actions — and you don't need to know how any of them work.`,
+ simple:`<b>In simple words:</b><br>
+ <b>Polymorphism</b> = the <b>same method name</b> in different classes, doing different things.<br><br>
+ You call <span class="word">drink.prepare()</span> and Python automatically picks the right one
+ based on what the object actually is. No if-else needed.`,
+ code:`class Tea:
+    def prepare(self):
+        return "Boiling milk and tea powder"
+
+class Coffee:
+    def prepare(self):
+        return "Running the filter"
+
+for drink in [Tea(), Coffee()]:
+    print(drink.prepare())`,
+ out:`Boiling milk and tea powder
+Running the filter`,
+ lines:`<b>Line by line:</b><br>
+ • Both classes have a method named <span class="word">prepare</span>. Same name, different work.<br>
+ • The loop holds a Tea first, then a Coffee.<br>
+ • <span class="word">drink.prepare()</span> is written only <b>once</b>.<br>
+ • Python checks what <b>drink</b> really is each time and runs that version.`,
+ take:`Add lime juice tomorrow and the loop <b>doesn't change at all</b>. That's why this is so useful.`
+},
+{
+ n:8, title:"🧰 Static method — the calculator on the wall",
+ scene:`A small calculator hangs near the billing counter.<br><br>
+ It doesn't belong to any customer, any cup or any branch. It just does maths.
+ But it stays at the billing counter, because that's where it makes sense.`,
+ simple:`<b>In simple words:</b><br>
+ A <b>static method</b> is a helper that sits inside a class, but <b>doesn't use self</b> at all.<br><br>
+ Because it needs no object, you call it straight from the class:
+ <span class="word">Billing.add(40, 25)</span> — no <span class="word">Billing()</span> needed.`,
+ code:`class Billing:
+    @staticmethod
+    def add(a, b):
+        return a + b
+
+print(Billing.add(40, 25))     # no object created!`,
+ out:`65`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">@staticmethod</span> sits on top and marks the method as standalone.<br>
+ • Notice there is <b>no self</b> in the brackets. That's the clue.<br>
+ • <span class="word">Billing.add(...)</span> uses the class name directly.<br>
+ • It works because the method needs no object's data.`,
+ take:`Easy test — if a method never writes <b>self</b>, it should probably be a static method.`
+},
+{
+ n:9, title:"✨ __str__ — make the printed slip readable",
+ scene:`The bill machine started printing slips that read
+ <i>&lt;Order object at 0x7f3a&gt;</i>.<br><br>
+ The customer can't read it. The delivery boy can't read it. Useless.<br><br>
+ So one decision: every printed order should read <b>"Order: 2 Tea, 1 Coffee"</b>.`,
+ simple:`<b>In simple words:</b><br>
+ By default, printing an object gives ugly text like <i>&lt;Order object at 0x...&gt;</i>.<br><br>
+ <span class="word">__str__</span> lets you decide <b>exactly what print() should show</b>.
+ It must <b>return</b> text — not print it.`,
+ code:`class Order:
+    def __init__(self, tea, coffee):
+        self.tea = tea
+        self.coffee = coffee
+
+    def __str__(self):
+        return f"Order: {self.tea} Tea, {self.coffee} Coffee"
+
+print(Order(2, 1))`,
+ out:`Order: 2 Tea, 1 Coffee`,
+ lines:`<b>Line by line:</b><br>
+ • <span class="word">__str__</span> has two underscores on each side — Python calls it automatically.<br>
+ • It runs whenever you write <span class="word">print(object)</span>.<br>
+ • It uses <b>return</b>, not print. Using print here is the most common beginner mistake.<br>
+ • The f before the quotes lets you drop values inside <span class="word">{ }</span>.`,
+ take:`These double-underscore methods are called <b>magic methods</b>. They connect your class to Python's built-in behaviour.`
+},
+{
+ n:10, title:"🎯 Abstraction — 'every branch must bill. how, is up to you.'",
+ scene:`With four branches running, a rule goes into the rulebook:
+ <i>"Every branch must have billing."</i><br><br>
+ It does <b>not</b> say how. One branch uses a card machine. One uses a paper book. One uses UPI.<br><br>
+ But a branch that says "we don't bill at all" cannot open. The rule isn't optional — only the
+ method is.`,
+ simple:`<b>In simple words:</b><br>
+ <b>Abstraction</b> = the parent class says <b>what must exist</b>, but refuses to say <b>how</b>.<br><br>
+ The easiest way: the parent's method just raises an error. That forces every child to write its
+ own real version.`,
+ code:`class Branch:
+    def bill(self):
+        raise NotImplementedError("Every branch must write bill()")
+
+class CityBranch(Branch):
+    def bill(self):
+        return "Billed by card machine"
+
+class HighwayBranch(Branch):
+    def bill(self):
+        return "Billed in the paper book"
+
+for b in [CityBranch(), HighwayBranch()]:
+    print(b.bill())`,
+ out:`Billed by card machine
+Billed in the paper book`,
+ lines:`<b>Line by line:</b><br>
+ • The parent's <span class="word">bill()</span> deliberately <b>refuses to work</b>.<br>
+ • That's the rule: "you must write your own".<br>
+ • Each child writes a real <span class="word">bill()</span> in its own way.<br>
+ • The loop just calls <span class="word">b.bill()</span> and trusts it exists.`,
+ take:`Anyone using a Branch knows <b>bill() exists</b> — without needing to know what machine is behind the counter.`
+}
+];
+
+function buildStory(){
+  const c = document.getElementById('story-container');
+  let html = `
+  <div class="story-intro">
+    <h2>☕ The Story of a Small Tea Shop</h2>
+    <p>
+      Someone opens a tiny tea shop near a bus stand. One kettle, one notebook, lots of enthusiasm.
+      Six months later there are four branches — and without ever opening a textbook, the owner
+      has learned every idea in Object-Oriented Programming.
+    </p>
+    <p>
+      Each chapter below teaches <b>one idea</b>. Press <b>▶ Play</b> on the scene and it walks you
+      through it step by step, with a sentence explaining each step. Then read the story, the simple
+      meaning, and the code.
+    </p>
+  </div>`;
+
+  chapters.forEach(ch => {
+    html += `
+    <div class="story-card">
+      <div class="chapter">Chapter ${ch.n}</div>
+      <h3>${ch.title}</h3>
+      ${makePlayer(ch.n, scenes[ch.n])}
+      <div class="scene">${ch.scene}</div>
+      <div class="simple">${ch.simple}</div>
+      <pre>${escapeHtml(ch.code)}</pre>
+      <p class="out-note">Output:<br>${escapeHtml(ch.out).replace(/\n/g,'<br>')}</p>
+      <div class="simple">${ch.lines}</div>
+      <div class="takeaway"><b>Remember:</b> ${ch.take}</div>
+    </div>`;
+  });
+
+  html += `
+  <div class="story-intro">
+    <h2>🌟 All ten in one line each</h2>
+    <p>
+      <b>Class</b> = the plan. <b>Object</b> = the real thing made from it.
+      <b>__init__</b> = set it up the moment it's made.
+      <b>self.x</b> = mine only; <b>Class.x</b> = shared by all.
+      <b>Inheritance</b> = get everything from another class free.
+      <b>Overriding</b> = replace one inherited method.
+      <b>Encapsulation</b> = hide the data, give a safe method instead.
+      <b>Polymorphism</b> = same method name, different behaviour.
+      <b>Static method</b> = helper with no self.
+      <b>__str__</b> = decide what print() shows.
+      <b>Abstraction</b> = say what must exist, not how.
+    </p>
+    <p>Now go to the <b>Quiz</b> tab and write each one yourself. ☕</p>
+  </div>`;
+
+  c.innerHTML = html;
+  // render first frame of every player
+  chapters.forEach(ch => renderStep(ch.n));
+}
+
+/* ============================================================
+   QUIZ
+   ============================================================ */
+const questions = [
+{
+  id:1, level:"easy",
+  title:"Q1. Make a class and an object",
+  desc:"Write the recipe card, then make one real cup. Create a class <code>Tea</code> with a method <code>serve()</code> that prints the message. Then create <code>cup</code> and call the method.",
+  goal:'Your program must print exactly:  Here is your hot tea!',
+  starter:
+`class Tea:
+    def serve(self):
+        # TODO: print "Here is your hot tea!"
+        pass
+
+cup = Tea()
+cup.serve()`,
+  hints:[
+    "You only need to replace the word 'pass' with a print() line.",
+    "Inside serve(), write a print with the message in quotes.",
+    "The exact line is: print(\"Here is your hot tea!\")"
+  ],
+  expected:"Here is your hot tea!",
+  answerCode:
+`class Tea:
+    def serve(self):
+        print("Here is your hot tea!")
+
+cup = Tea()
+cup.serve()`,
+  example:"Tea is the plan. cup = Tea() makes a real object from that plan. cup.serve() tells that object to do its job."
+},
+{
+  id:2, level:"easy",
+  title:"Q2. Use __init__ to set things up",
+  desc:"Ask the order first, then serve. Store <code>sugar</code> and <code>strength</code> inside <code>__init__</code>, and print them in <code>serve()</code>.",
+  goal:'Your program must print exactly:  Tea with 2 sugar, strong strength',
+  starter:
+`class Tea:
+    def __init__(self, sugar, strength):
+        # TODO: save them into this cup using self
+        pass
+
+    def serve(self):
+        # TODO: print "Tea with 2 sugar, strong strength"
+        pass
+
+cup = Tea(2, "strong")
+cup.serve()`,
+  hints:[
+    "'self' means this cup. Save with self.sugar = sugar and self.strength = strength.",
+    "Delete the 'pass' lines once you write real code there.",
+    "In serve(), write: print(f\"Tea with {self.sugar} sugar, {self.strength} strength\")"
+  ],
+  expected:"Tea with 2 sugar, strong strength",
+  answerCode:
+`class Tea:
+    def __init__(self, sugar, strength):
+        self.sugar = sugar
+        self.strength = strength
+
+    def serve(self):
+        print(f"Tea with {self.sugar} sugar, {self.strength} strength")
+
+cup = Tea(2, "strong")
+cup.serve()`,
+  example:"__init__ runs automatically when Tea(2, \"strong\") is written. The values get stored on self, so serve() can read them back later."
+},
+{
+  id:3, level:"easy",
+  title:"Q3. A shared counter (class variable)",
+  desc:"The chalkboard counts every cup. Add 1 to <code>cups_sold</code> each time a cup is made, then print the total after 3 cups.",
+  goal:'Your program must print exactly:  3',
+  starter:
+`class Tea:
+    cups_sold = 0
+
+    def __init__(self):
+        # TODO: add 1 to the shared counter
+        pass
+
+Tea()
+Tea()
+Tea()
+print(Tea.cups_sold)`,
+  hints:[
+    "Use the class name, not self, because the board is shared.",
+    "The line goes inside __init__ so it runs for every new cup.",
+    "Write: Tea.cups_sold += 1"
+  ],
+  expected:"3",
+  answerCode:
+`class Tea:
+    cups_sold = 0
+
+    def __init__(self):
+        Tea.cups_sold += 1
+
+Tea()
+Tea()
+Tea()
+print(Tea.cups_sold)`,
+  example:"cups_sold sits directly under the class, so all objects share one copy. Each Tea() adds 1 to that same number, giving 3."
+},
+{
+  id:4, level:"easy",
+  title:"Q4. Inheritance — get everything for free",
+  desc:"The new branch uses the same rulebook. Make <code>BranchTwo</code> inherit from <code>Shop</code> and add nothing new, then call <code>greet()</code> on it.",
+  goal:'Your program must print exactly:  Welcome to our shop!',
+  starter:
+`class Shop:
+    def greet(self):
+        print("Welcome to our shop!")
+
+class BranchTwo(Shop):
+    # TODO: nothing to add — just keep 'pass' here
+    pass
+
+b = BranchTwo()
+b.greet()`,
+  hints:[
+    "The brackets in class BranchTwo(Shop): are what give it everything.",
+    "You do NOT need to write greet() again — it comes down automatically.",
+    "Just check the class line is exactly: class BranchTwo(Shop):"
+  ],
+  expected:"Welcome to our shop!",
+  answerCode:
+`class Shop:
+    def greet(self):
+        print("Welcome to our shop!")
+
+class BranchTwo(Shop):
+    pass
+
+b = BranchTwo()
+b.greet()`,
+  example:"BranchTwo has no greet() of its own. Python looks up to the parent Shop, finds greet() there, and runs it."
+},
+{
+  id:5, level:"easy",
+  title:"Q5. Overriding — change one inherited method",
+  desc:"The college shop greets differently. Give <code>CollegeBranch</code> its own <code>greet()</code> with new words.",
+  goal:'Your program must print exactly:  Hey! Usual tea?',
+  starter:
+`class Shop:
+    def greet(self):
+        print("Welcome to our shop!")
+
+class CollegeBranch(Shop):
+    def greet(self):
+        # TODO: print "Hey! Usual tea?"
+        pass
+
+CollegeBranch().greet()`,
+  hints:[
+    "Keep the method name exactly the same: greet.",
+    "Only the words inside change.",
+    "Write: print(\"Hey! Usual tea?\")"
+  ],
+  expected:"Hey! Usual tea?",
+  answerCode:
+`class Shop:
+    def greet(self):
+        print("Welcome to our shop!")
+
+class CollegeBranch(Shop):
+    def greet(self):
+        print("Hey! Usual tea?")
+
+CollegeBranch().greet()`,
+  example:"Python checks the child class first. It finds greet() in CollegeBranch, so the parent's version is skipped — only for this method."
+},
+{
+  id:6, level:"medium",
+  title:"Q6. Encapsulation — hide the money",
+  desc:"Lock the cash away. Store the amount privately as <code>__balance</code>, and return it through <code>get_balance()</code>.",
+  goal:'Your program must print exactly:  500',
+  starter:
+`class CashBox:
+    def __init__(self, amount):
+        # TODO: save it as self.__balance
+        pass
+
+    def get_balance(self):
+        # TODO: return self.__balance
+        pass
+
+box = CashBox(500)
+print(box.get_balance())`,
+  hints:[
+    "Two underscores in front make it private: __balance",
+    "In __init__ write: self.__balance = amount",
+    "In get_balance() write: return self.__balance"
+  ],
+  expected:"500",
+  answerCode:
+`class CashBox:
+    def __init__(self, amount):
+        self.__balance = amount
+
+    def get_balance(self):
+        return self.__balance
+
+box = CashBox(500)
+print(box.get_balance())`,
+  example:"The money is hidden inside the object. Outside code cannot grab __balance directly — it must go through get_balance(), the one safe door."
+},
+{
+  id:7, level:"medium",
+  title:"Q7. Polymorphism — same name, different work",
+  desc:"One call, two drinks. Give <code>Tea</code> and <code>Coffee</code> each a <code>prepare()</code> that <b>returns</b> its own text. The loop prints them.",
+  goal:'Your program must print exactly (two lines):\nBoiling milk and tea powder\nRunning the filter',
+  starter:
+`class Tea:
+    def prepare(self):
+        # TODO: return "Boiling milk and tea powder"
+        pass
+
+class Coffee:
+    def prepare(self):
+        # TODO: return "Running the filter"
+        pass
+
+for drink in [Tea(), Coffee()]:
+    print(drink.prepare())`,
+  hints:[
+    "Use 'return', not 'print' — the loop already prints it for you.",
+    "Both methods must have the exact same name: prepare",
+    "Tea returns \"Boiling milk and tea powder\"; Coffee returns \"Running the filter\"."
+  ],
+  expected:"Boiling milk and tea powder\nRunning the filter",
+  answerCode:
+`class Tea:
+    def prepare(self):
+        return "Boiling milk and tea powder"
+
+class Coffee:
+    def prepare(self):
+        return "Running the filter"
+
+for drink in [Tea(), Coffee()]:
+    print(drink.prepare())`,
+  example:"drink.prepare() is written once. Python checks what drink really is each time around the loop and runs that class's version — no if-else needed."
+},
+{
+  id:8, level:"medium",
+  title:"Q8. Static method — no object needed",
+  desc:"The wall calculator. Finish the static method <code>add(a, b)</code> so it returns the sum.",
+  goal:'Your program must print exactly:  65',
+  starter:
+`class Billing:
+    @staticmethod
+    def add(a, b):
+        # TODO: return a + b
+        pass
+
+print(Billing.add(40, 25))`,
+  hints:[
+    "Notice there is no 'self' here — that's what makes it static.",
+    "You just need one line to send the answer back.",
+    "Write: return a + b"
+  ],
+  expected:"65",
+  answerCode:
+`class Billing:
+    @staticmethod
+    def add(a, b):
+        return a + b
+
+print(Billing.add(40, 25))`,
+  example:"Because the method uses no object data, you call it straight off the class name — Billing.add(40, 25) — without ever writing Billing()."
+},
+{
+  id:9, level:"medium",
+  title:"Q9. __str__ — make print() readable",
+  desc:"Fix the ugly slip. Add <code>__str__</code> so printing the order shows a readable line.",
+  goal:'Your program must print exactly:  Order: 2 Tea, 1 Coffee',
+  starter:
+`class Order:
+    def __init__(self, tea, coffee):
+        self.tea = tea
+        self.coffee = coffee
+
+    def __str__(self):
+        # TODO: return "Order: 2 Tea, 1 Coffee" using self.tea and self.coffee
+        pass
+
+print(Order(2, 1))`,
+  hints:[
+    "__str__ must RETURN text. Using print inside it will not work.",
+    "An f-string lets you drop values inside curly braces.",
+    "Write: return f\"Order: {self.tea} Tea, {self.coffee} Coffee\""
+  ],
+  expected:"Order: 2 Tea, 1 Coffee",
+  answerCode:
+`class Order:
+    def __init__(self, tea, coffee):
+        self.tea = tea
+        self.coffee = coffee
+
+    def __str__(self):
+        return f"Order: {self.tea} Tea, {self.coffee} Coffee"
+
+print(Order(2, 1))`,
+  example:"Python calls __str__ automatically whenever you print an object. Without it you'd see something like <__main__.Order object at 0x...>."
+},
+{
+  id:10, level:"medium",
+  title:"Q10. Abstraction — the parent sets the rule",
+  desc:"Every branch must bill, its own way. The parent refuses to implement it — write the real <code>bill()</code> inside <code>CityBranch</code>.",
+  goal:'Your program must print exactly:  Billed by card machine',
+  starter:
+`class Branch:
+    def bill(self):
+        raise NotImplementedError("Every branch must write bill()")
+
+class CityBranch(Branch):
+    def bill(self):
+        # TODO: return "Billed by card machine"
+        pass
+
+print(CityBranch().bill())`,
+  hints:[
+    "Leave the parent class exactly as it is — its job is to refuse.",
+    "Only the child needs real code.",
+    "Write: return \"Billed by card machine\""
+  ],
+  expected:"Billed by card machine",
+  answerCode:
+`class Branch:
+    def bill(self):
+        raise NotImplementedError("Every branch must write bill()")
+
+class CityBranch(Branch):
+    def bill(self):
+        return "Billed by card machine"
+
+print(CityBranch().bill())`,
+  example:"The parent says bill() must exist but refuses to do it. The child supplies the real version. Anyone holding a Branch can call bill() and trust it works."
+}
+];
+
+let solvedCount = 0;
+const hintState = {};
+
+function escapeHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function buildQuiz(){
+  const container = document.getElementById('quiz-container');
+  questions.forEach(q => {
+    hintState[q.id] = 0;
+    const badgeClass = q.level === 'easy' ? 'badge-easy' : 'badge-medium';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.id = 'card'+q.id;
+    card.innerHTML = `
+      <div>
+        <span class="qtitle">${q.title}</span>
+        <span class="qbadge ${badgeClass}">${q.level}</span>
+      </div>
+      <p class="qdesc">${q.desc}</p>
+      <div class="goal">🎯 ${escapeHtml(q.goal).replace(/\n/g,'<br>')}</div>
+      <textarea id="code${q.id}" spellcheck="false">${escapeHtml(q.starter)}</textarea>
+      <div class="btnrow">
+        <button class="run-btn" onclick="runCode(${q.id})">▶ Run Code</button>
+        <button class="icon-btn hint-btn" title="Get a hint" onclick="showHint(${q.id})">💡</button>
+        <span class="hint-tag">Hint</span>
+        <button class="icon-btn answer-btn" title="See the answer" onclick="toggleAnswer(${q.id})">📖</button>
+        <span class="answer-tag">Answer</span>
+      </div>
+      <div class="hintbox" id="hintbox${q.id}"></div>
+      <div class="answerbox" id="answerbox${q.id}">
+        <b>✅ Correct answer:</b>
+        <pre>${escapeHtml(q.answerCode)}</pre>
+        <b>💡 Why it works:</b>
+        <p>${q.example}</p>
+      </div>
+      <div class="result" id="result${q.id}"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function showHint(qid){
+  const q = questions.find(x=>x.id===qid);
+  const box = document.getElementById('hintbox'+qid);
+  const idx = hintState[qid] % 3;
+  box.style.display = 'block';
+  box.innerHTML = `<b>Hint ${idx+1} of 3:</b> ${q.hints[idx]}`;
+  hintState[qid]++;
+}
+
+function toggleAnswer(qid){
+  const box = document.getElementById('answerbox'+qid);
+  box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+}
+
+function normalize(t){ return t.split('\n').map(l=>l.replace(/\s+$/,'')).join('\n').trim(); }
+
+function runCode(qid){
+  const q = questions.find(x=>x.id===qid);
+  const code = document.getElementById('code'+qid).value;
+  const resultBox = document.getElementById('result'+qid);
+  let out = '';
+  function outf(t){ out += t; }
+  function builtinRead(x){
+    if (Sk.builtinFiles === undefined || Sk.builtinFiles["files"][x] === undefined)
+      throw "File not found: '" + x + "'";
+    return Sk.builtinFiles["files"][x];
+  }
+  Sk.configure({output:outf, read:builtinRead, __future__:Sk.python3});
+  Sk.misceval.asyncToPromise(function(){
+    return Sk.importMainWithBody("<stdin>", false, code, true);
+  }).then(function(){
+    if (normalize(out) === normalize(q.expected)){
+      resultBox.className = 'result ok';
+      resultBox.innerHTML = `<span class="out-label">✅ Correct!</span>Your output:\n${out || '(nothing printed)'}`;
+      markSolved(qid);
+    } else {
+      resultBox.className = 'result err';
+      resultBox.innerHTML = `<span class="out-label">❌ Not yet — try again.</span>Your output:\n${out || '(nothing printed)'}\n\nExpected:\n${q.expected}`;
+    }
+  }, function(err){
+    resultBox.className = 'result err';
+    resultBox.innerHTML = `<span class="out-label">⚠ Error in your code:</span>${err.toString()}`;
+  });
+}
+
+function markSolved(qid){
+  const card = document.getElementById('card'+qid);
+  if (!card.classList.contains('solved')){
+    card.classList.add('solved');
+    solvedCount++;
+    document.getElementById('progress').textContent = `Solved: ${solvedCount} / 10`;
+  }
+  heartBomb();
+}
+
+function heartBomb(){
+  const overlay = document.createElement('div');
+  overlay.id = 'heart-overlay';
+  document.body.appendChild(overlay);
+  const hearts = ['❤️','💖','💕','💗','💘'];
+  for (let i=0;i<36;i++){
+    const h = document.createElement('div');
+    h.className = 'heart';
+    h.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+    h.style.left = Math.random()*100+'vw';
+    h.style.animationDelay = (Math.random()*0.4)+'s';
+    h.style.fontSize = (20+Math.random()*22)+'px';
+    overlay.appendChild(h);
+  }
+  const msg = document.createElement('div');
+  msg.className = 'best-msg';
+  msg.textContent = 'You are the Best! 🎉';
+  document.body.appendChild(msg);
+  setTimeout(()=>{ overlay.remove(); msg.remove(); }, 2100);
+}
+
+buildQuiz();
+buildStory();
+</script>
+</body>
+</html>
